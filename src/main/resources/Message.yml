@@ -1,0 +1,6 @@
+place-chest: "システム>>ChestGuard>>チェストプロテクトを設定しました"
+break-chest: "システム>>ChestGuard>>チェストプロテクトを消去しました"
+player-chest-interact-byOp: "オペレーター権限によりチェストを解錠しました。"
+player-chest-break-byOp: "オペレーター権限によりチェストを撤去しました。"
+error-non-registered-chest: "このチェストはデータベースに登録されていません。"
+error-not-own-chest: "システム>>ChestGuard>>自分のチェストではないため編集できません"

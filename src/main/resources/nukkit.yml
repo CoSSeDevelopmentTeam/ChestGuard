@@ -1,0 +1,7 @@
+name: ChestGuard
+main: net.comorevi.cosse.chestguard.ChestGuard
+version: 1.0.0
+load: POSTWORLD
+author: popkechupki
+api: ["1.0.0"]
+description: チェスト保護プラグイン
