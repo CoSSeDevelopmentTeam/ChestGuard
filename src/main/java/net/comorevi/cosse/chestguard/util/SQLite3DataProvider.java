@@ -1,18 +1,16 @@
-package net.comorevi.cosse.chestguard;
+package net.comorevi.cosse.chestguard.util;
 
 import java.sql.*;
 
 public class SQLite3DataProvider {
 
-    private ChestGuard plugin;
     private Connection connection = null;
 
-    public SQLite3DataProvider(ChestGuard plugin) {
-        this.plugin = plugin;
+    public SQLite3DataProvider() {
         connectSQL();
     }
 
-    boolean existsChestData(String formattedLocation) {
+    public boolean existsChestData(String formattedLocation) {
         try {
             String sql = "SELECT location FROM chestguard WHERE location = ?";
             PreparedStatement statement = connection.prepareStatement(sql);
@@ -29,7 +27,7 @@ public class SQLite3DataProvider {
         return false;
     }
 
-    void createChestData(String formattedLocation, String owner) {
+    public void createChestData(String formattedLocation, String owner) {
         try {
             if (existsChestData(formattedLocation)) return;
 
@@ -38,7 +36,7 @@ public class SQLite3DataProvider {
             statement.setQueryTimeout(30);
             statement.setString(1, owner);
             statement.setString(2, formattedLocation);
-            statement.setInt(3, GuardType.DEFAULT);
+            statement.setInt(3, ProtectType.PROTECT_TYPE_DEFAULT.getId());
             statement.setString(4, null);
 
             statement.executeUpdate();
@@ -48,7 +46,7 @@ public class SQLite3DataProvider {
         }
     }
 
-    void deleteChestData(String formattedLocation) {
+    public void deleteChestData(String formattedLocation) {
         try {
             if (!existsChestData(formattedLocation)) return;
 
@@ -64,14 +62,14 @@ public class SQLite3DataProvider {
         }
     }
 
-    void changeGuardType(String formattedLocation, int type, String data) {
+    public void changeGuardType(String formattedLocation, ProtectType type, String data) {
         String sql = "UPDATE chestguard SET ( type , option ) VALUES ( ?, ? ) WHERE location = ?";
         switch (type) {
-            case GuardType.DEFAULT:
+            case PROTECT_TYPE_DEFAULT:
                 try {
                     PreparedStatement statement = connection.prepareStatement(sql);
                     statement.setQueryTimeout(30);
-                    statement.setInt(1, GuardType.DEFAULT);
+                    statement.setInt(1, ProtectType.PROTECT_TYPE_DEFAULT.getId());
                     statement.setString(2, null);
                     statement.setString(3, formattedLocation);
 
@@ -81,11 +79,11 @@ public class SQLite3DataProvider {
                     e.printStackTrace();
                 }
                 break;
-            case GuardType.PASSWORD:
+            case PROTECT_TYPE_PASSWORD:
                 try {
                     PreparedStatement statement = connection.prepareStatement(sql);
                     statement.setQueryTimeout(30);
-                    statement.setInt(1, GuardType.PASSWORD);
+                    statement.setInt(1, ProtectType.PROTECT_TYPE_PASSWORD.getId());
                     statement.setString(2, data);
                     statement.setString(3, formattedLocation);
 
@@ -95,11 +93,11 @@ public class SQLite3DataProvider {
                     e.printStackTrace();
                 }
                 break;
-            case GuardType.SHARE:
+            case PROTECT_TYPE_SHARE:
                 try {
                     PreparedStatement statement = connection.prepareStatement(sql);
                     statement.setQueryTimeout(30);
-                    statement.setInt(1, GuardType.SHARE);
+                    statement.setInt(1, ProtectType.PROTECT_TYPE_SHARE.getId());
                     statement.setString(2, data);
                     statement.setString(3, formattedLocation);
 
@@ -109,11 +107,11 @@ public class SQLite3DataProvider {
                     e.printStackTrace();
                 }
                 break;
-            case GuardType.PUBLIC:
+            case PROTECT_TYPE_PUBLIC:
                 try {
                     PreparedStatement statement = connection.prepareStatement(sql);
                     statement.setQueryTimeout(30);
-                    statement.setInt(1, GuardType.PUBLIC);
+                    statement.setInt(1, ProtectType.PROTECT_TYPE_PUBLIC.getId());
                     statement.setString(2, null);
                     statement.setString(3, formattedLocation);
 
@@ -128,7 +126,7 @@ public class SQLite3DataProvider {
         }
     }
 
-    String getChestOwnerName(String formattedLocation) {
+    public String getOwnerName(String formattedLocation) {
         try {
             if (!existsChestData(formattedLocation)) return null;
 
@@ -147,7 +145,7 @@ public class SQLite3DataProvider {
         return null;
     }
 
-    String getGuardType(String formattedLocation) {
+    public String getGuardType(String formattedLocation) {
         try {
             if (!existsChestData(formattedLocation)) return null;
 
@@ -166,7 +164,7 @@ public class SQLite3DataProvider {
         return null;
     }
 
-    String getOptionData(String formattedLocation) {
+    public String getOptionData(String formattedLocation) {
         try {
             if (!existsChestData(formattedLocation)) return null;
 
@@ -192,7 +190,7 @@ public class SQLite3DataProvider {
             System.err.println(e.getMessage());
         }
         try {
-            connection = DriverManager.getConnection("jdbc:sqlite:" + plugin.getDataFolder().toString() + "/DataDB.db");
+            connection = DriverManager.getConnection("jdbc:sqlite:./plugins/ChestGuard/DataDB.db");
             Statement statement = connection.createStatement();
             statement.setQueryTimeout(30);
             statement.executeUpdate(
@@ -209,14 +207,18 @@ public class SQLite3DataProvider {
         }
     }
 
-    void disConnectSQL() {
-        if (connection != null) {
+    public void disConnectSQL() {
+        if (isConnected()) {
             try {
                 connection.close();
             } catch (SQLException e) {
                 e.printStackTrace();
             }
         }
+    }
+
+    public boolean isConnected() {
+        return connection != null;
     }
 
 }

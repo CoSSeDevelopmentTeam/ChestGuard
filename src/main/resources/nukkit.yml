@@ -1,7 +1,10 @@
 name: ChestGuard
-main: net.comorevi.cosse.chestguard.ChestGuard
+main: net.comorevi.cosse.chestguard.Main
 version: 1.0.0
-load: POSTWORLD
 author: popkechupki
+authors: ["itsu"]
+load: POSTWORLD
+depend:
+  - FormAPI
 api: ["1.0.0"]
-description: チェスト保護プラグイン
+description: Protect your chests. Also, you can configure protect options.
