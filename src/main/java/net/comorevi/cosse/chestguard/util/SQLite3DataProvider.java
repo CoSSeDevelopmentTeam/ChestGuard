@@ -63,7 +63,7 @@ public class SQLite3DataProvider {
     }
 
     public void changeGuardType(String formattedLocation, ProtectType type, String data) {
-        String sql = "UPDATE chestguard SET ( type , option ) VALUES ( ?, ? ) WHERE location = ?";
+        String sql = "UPDATE chestguard SET type = ?, option = ? WHERE location = ?";
         switch (type) {
             case PROTECT_TYPE_DEFAULT:
                 try {
