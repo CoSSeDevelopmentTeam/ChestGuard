@@ -18,6 +18,8 @@ import cn.nukkit.event.Listener;
 import cn.nukkit.event.block.BlockBreakEvent;
 import cn.nukkit.event.block.BlockPlaceEvent;
 import cn.nukkit.event.player.PlayerInteractEvent;
+import cn.nukkit.inventory.ChestInventory;
+import cn.nukkit.inventory.Inventory;
 import net.comorevi.cosse.chestguard.api.ChestGuardAPI;
 import net.comorevi.cosse.chestguard.util.DataCenter;
 import net.comorevi.cosse.chestguard.util.ProtectType;
@@ -128,14 +130,12 @@ public class EventListener implements Listener {
                         event.setCancelled();
                         event.getPlayer().sendMessage("[ChestGuard] This chest is not shared with you.");
                     } else {
-                        event.getPlayer().addWindow(((BlockEntityChest) block.getLevel().getBlockEntity(block.getLocation())).getInventory());
                         event.getPlayer().sendMessage("[ChestGuard] Certified.");
                     }
                 }
                 break;
             case PROTECT_TYPE_PUBLIC:
                 if (!pluginAPI.isOwner((BlockChest) block, event.getPlayer())) {
-                    event.getPlayer().addWindow(((BlockEntityChest) block.getLevel().getBlockEntity(block.getLocation())).getInventory());
                     event.getPlayer().sendMessage("[ChestGuard] You opened PUBLIC chest. Provided by "+pluginAPI.getRegisteredDataMap((BlockChest) block).get("owner")+".");
                 }
                 break;
@@ -222,7 +222,7 @@ public class EventListener implements Listener {
                 if (pluginAPI.getRegisteredDataMap(DataCenter.getCmdQueueRegisteredChest(event.getPlayer())).get("data").equals(responseCustom.getInputResponse(1))) {
                     event.getPlayer().addWindow(((BlockEntityChest) event.getPlayer().getLevel().getBlockEntity(DataCenter.getCmdQueueRegisteredChest(event.getPlayer()).getLocation())).getInventory());
                     DataCenter.removeCmdQueue(event.getPlayer());
-                    event.getPlayer().sendMessage("[ChestGuard] Certified.");
+                    event.getPlayer().sendMessage("[ChestGuard] Certified. Hit target chest again, then you can open the chest.");
                 } else {
                     DataCenter.removeCmdQueue(event.getPlayer());
                     event.getPlayer().sendMessage("[ChestGuard] Password is not correct.");
