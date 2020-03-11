@@ -29,6 +29,7 @@ import static cn.nukkit.block.BlockID.CHEST;
 public class EventListener implements Listener {
 
     private Main plugin;
+    private String br = System.getProperty("line.separator");
     private ChestGuardAPI pluginAPI = ChestGuardAPI.getSingletonInstance();
     private FormAPI formAPI = new FormAPI();
 
@@ -149,7 +150,7 @@ public class EventListener implements Listener {
                         break;
                     }
                     pluginAPI.changeChestGuardType(DataCenter.getRegisteredChest(event.getPlayer()), ProtectType.PROTECT_TYPE_PASSWORD, responseCustom.getInputResponse(3));
-                    event.getPlayer().sendMessage("[ChestGuard] Set guard type to PASSWORD."+"¥n"+"Your password is: "+pluginAPI.getRegisteredDataMap(DataCenter.getRegisteredChest(event.getPlayer())).get("data"));
+                    event.getPlayer().sendMessage("[ChestGuard] Set guard type to PASSWORD."+br+"Your password is: "+pluginAPI.getRegisteredDataMap(DataCenter.getRegisteredChest(event.getPlayer())).get("data"));
                     break;
                 case "SHARE":
                     if (responseCustom.getInputResponse(3).equals("")) {
@@ -157,7 +158,7 @@ public class EventListener implements Listener {
                         break;
                     }
                     pluginAPI.changeChestGuardType(DataCenter.getRegisteredChest(event.getPlayer()), ProtectType.PROTECT_TYPE_SHARE, responseCustom.getInputResponse(3));
-                    event.getPlayer().sendMessage("[ChestGuard] Set guard type to SHARE."+"¥n"+"Your chest is shared with: "+pluginAPI.getRegisteredDataMap(DataCenter.getRegisteredChest(event.getPlayer())).get("data"));
+                    event.getPlayer().sendMessage("[ChestGuard] Set guard type to SHARE."+br+"Your chest is shared with: "+pluginAPI.getRegisteredDataMap(DataCenter.getRegisteredChest(event.getPlayer())).get("data"));
                     break;
                 case "PUBLIC":
                     pluginAPI.changeChestGuardType(DataCenter.getRegisteredChest(event.getPlayer()), ProtectType.PROTECT_TYPE_PUBLIC, null);
@@ -185,7 +186,7 @@ public class EventListener implements Listener {
     }
     private FormWindowModal getStatusWindow(BlockChest chest) {
         return new FormWindowModal("Info - ChestGuard",
-                "owner: "+pluginAPI.getRegisteredDataMap(chest).get("owner")+"¥nLocation: "+pluginAPI.getRegisteredDataMap(chest).get("location")+"¥nType: "+pluginAPI.getRegisteredDataMap(chest).get("type")+"¥nOptional data: "+pluginAPI.getRegisteredDataMap(chest).getOrDefault("data", "null"),
+                "owner: "+pluginAPI.getRegisteredDataMap(chest).get("owner")+br+"Location: "+pluginAPI.getRegisteredDataMap(chest).get("location")+br+"Type: "+pluginAPI.getRegisteredDataMap(chest).get("typeString")+br+"Optional data: "+pluginAPI.getRegisteredDataMap(chest).getOrDefault("data", "null"),
                 "Edit option",
                 "close");
     }
