@@ -21,6 +21,7 @@ import net.comorevi.cosse.chestguard.api.ChestGuardAPI;
 import net.comorevi.cosse.chestguard.util.DataCenter;
 import net.comorevi.cosse.chestguard.util.ProtectType;
 
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -99,11 +100,53 @@ public class EventListener implements Listener {
             return;
         }
 
-        if (!pluginAPI.isOwner((BlockChest) block, event.getPlayer()) && event.getPlayer().isOp()) {
-            event.getPlayer().sendMessage(plugin.translateString("player-chest-interact-byOp"));
-        } else if (!pluginAPI.isOwner((BlockChest) block, event.getPlayer())) {
-            event.setCancelled();
-            event.getPlayer().sendMessage(plugin.translateString("error-not-own-chest"));
+        switch (ProtectType.getById((Integer) pluginAPI.getRegisteredDataMap((BlockChest) block).get("typeId"))) {
+            case PROTECT_TYPE_DEFAULT:
+                if (!pluginAPI.isOwner((BlockChest) block, event.getPlayer()) && event.getPlayer().isOp()) {
+                    event.getPlayer().sendMessage(plugin.translateString("player-chest-interact-byOp"));
+                } else if (!pluginAPI.isOwner((BlockChest) block, event.getPlayer())) {
+                    event.setCancelled();
+                    event.getPlayer().sendMessage(plugin.translateString("error-not-own-chest"));
+                }
+                break;
+            case PROTECT_TYPE_PASSWORD:
+                if (pluginAPI.isOwner((BlockChest) block, event.getPlayer())) return;
+                if (event.getPlayer().isOp()) {
+                    event.getPlayer().sendMessage(plugin.translateString("player-chest-interact-byOp"));
+                    return;
+                }
+                if (!DataCenter.existCmdQueue(event.getPlayer())) {
+                    DataCenter.addCmdQueue(event.getPlayer(), (BlockChest) block);
+                    formAPI.add("pass-auth", getPasswordAuthenticationWindow());
+                    event.getPlayer().showFormWindow(formAPI.get("pass-auth"), formAPI.getId("pass-auth"));
+                    event.setCancelled();
+                } else if (DataCenter.existsUnlockQueue(event.getPlayer())) {
+                    if (DataCenter.getUnlockTargetChest(event.getPlayer()).equals(block)) {
+                        event.getPlayer().sendMessage("[ChestGuard] Opened PASSWORD locked chest.");
+                        DataCenter.removeUnlockQueue(event.getPlayer());
+                    } else {
+                        event.getPlayer().sendMessage("[ChestGuard] This chest is not target.");
+                        event.setCancelled();
+                    }
+                }
+                break;
+            case PROTECT_TYPE_SHARE:
+                if (!pluginAPI.isOwner((BlockChest) block, event.getPlayer()) && event.getPlayer().isOp()) {
+                    event.getPlayer().sendMessage(plugin.translateString("player-chest-interact-byOp"));
+                } else if (!pluginAPI.isOwner((BlockChest) block, event.getPlayer())) {
+                    String data = (String) pluginAPI.getRegisteredDataMap((BlockChest) block).get("data");
+                    String[] shared = data.split(",");
+                    if (!Arrays.asList(shared).contains(event.getPlayer().getName())) {
+                        event.setCancelled();
+                        event.getPlayer().sendMessage("[ChestGuard] This chest is not shared with you.");
+                    }
+                }
+                break;
+            case PROTECT_TYPE_PUBLIC:
+                if (!pluginAPI.isOwner((BlockChest) block, event.getPlayer())) {
+                    event.getPlayer().sendMessage("[ChestGuard] You opened PUBLIC chest. Provided by "+pluginAPI.getRegisteredDataMap((BlockChest) block).get("owner")+".");
+                }
+                break;
         }
     }
 
@@ -174,6 +217,25 @@ public class EventListener implements Listener {
                 pluginAPI.addChestGuard(DataCenter.getRegisteredChest(event.getPlayer()), responseCustom.getInputResponse(1));
                 event.getPlayer().sendMessage("[ChestGuard] Added new chest.");
             }
+        } else if (event.getFormID() == formAPI.getId("pass-auth")) {
+            if (event.wasClosed()) {
+                DataCenter.removeCmdQueue(event.getPlayer());
+                return;
+            }
+            FormResponseCustom responseCustom = (FormResponseCustom) event.getResponse();
+            if (responseCustom.getInputResponse(1).equals("")) {
+                DataCenter.removeCmdQueue(event.getPlayer());
+                event.getPlayer().sendMessage("[ChestGuard] You have to enter password to open the chest.");
+            } else {
+                if (pluginAPI.getRegisteredDataMap(DataCenter.getRegisteredChest(event.getPlayer())).get("data").equals(responseCustom.getInputResponse(1))) {
+                    DataCenter.addUnlockQueue(event.getPlayer(), DataCenter.getRegisteredChest(event.getPlayer()));
+                    DataCenter.removeCmdQueue(event.getPlayer());
+                    event.getPlayer().sendMessage("[ChestGuard] Certified. Hit target chest again, then you can open the chest.");
+                } else {
+                    DataCenter.removeCmdQueue(event.getPlayer());
+                    event.getPlayer().sendMessage("[ChestGuard] Password is not correct.");
+                }
+            }
         }
     }
 
@@ -216,5 +278,14 @@ public class EventListener implements Listener {
             }
         };
         return new FormWindowCustom("Add - ChestGuard", elements);
+    }
+    private FormWindowCustom getPasswordAuthenticationWindow() {
+        List<Element> elements = new LinkedList<Element>() {
+            {
+                add(new ElementLabel("Enter password and push submit."));
+                add(new ElementInput("Password", "enter password..."));
+            }
+        };
+        return new FormWindowCustom("Authentication - ChestGuard", elements);
     }
 }
