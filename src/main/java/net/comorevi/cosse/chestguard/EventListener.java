@@ -42,6 +42,7 @@ public class EventListener implements Listener {
     @EventHandler
     public void onBlockPlace(BlockPlaceEvent event) {
         Block block = event.getBlock();
+        if (plugin.ignoreWorlds.contains(block.getLevel().getName())) return;
         if (block.getId() != CHEST) return;
 
         pluginAPI.addChestGuard((BlockChest) block, event.getPlayer());
@@ -51,6 +52,7 @@ public class EventListener implements Listener {
     @EventHandler
     public void onBlockBreak(BlockBreakEvent event) {
         Block block = event.getBlock();
+        if (plugin.ignoreWorlds.contains(block.getLevel().getName())) return;
         if (block.getId() != CHEST) return;
         if (!pluginAPI.existsChestData((BlockChest) block) && !event.getPlayer().isOp()) {
             event.setCancelled();
@@ -73,6 +75,7 @@ public class EventListener implements Listener {
     @EventHandler
     public void onPlayerInteract(PlayerInteractEvent event) {
         Block block = event.getBlock();
+        if (plugin.ignoreWorlds.contains(block.getLevel().getName())) return;
         if (block.getId() != CHEST) return;
 
         if (DataCenter.existCmdQueue(event.getPlayer())) {

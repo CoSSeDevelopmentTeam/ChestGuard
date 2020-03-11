@@ -2,6 +2,7 @@ package net.comorevi.cosse.chestguard;
 
 import cn.nukkit.plugin.PluginBase;
 import cn.nukkit.utils.Config;
+import cn.nukkit.utils.ConfigSection;
 import cn.nukkit.utils.TextFormat;
 import cn.nukkit.utils.Utils;
 import net.comorevi.cosse.chestguard.api.ChestGuardAPI;
@@ -15,12 +16,15 @@ import java.util.*;
 public class Main extends PluginBase {
 
     private Config translateFile;
-    private Map<String, Object> configData = new HashMap<String, Object>();
+    private Config conf;
+    private Map<String, Object> configData = new HashMap<>();
+    protected List<String> ignoreWorlds = new ArrayList<>();
 
     @Override
     public void onEnable() {
         getDataFolder().mkdirs();
         initMessageConfig();
+        initChestProtectConfig();
         getServer().getCommandMap().register("chestgd", new ChestGuardCommand());
         getServer().getPluginManager().registerEvents(new EventListener(this), this);
     }
@@ -62,6 +66,20 @@ public class Main extends PluginBase {
         this.translateFile = new Config(new File(getDataFolder().toString() + "/Message.yml"), Config.YAML);
         this.translateFile.load(getDataFolder().toString() + "/Message.yml");
         this.configData = this.translateFile.getAll();
-        return;
+    }
+
+    private void initChestProtectConfig(){
+        List<String> list = new LinkedList<String>(){
+            {
+                add("enter_ignore_level_name_NOT_folder_name");
+            }
+        };
+        ConfigSection cs = new ConfigSection(){
+            {
+                put("IgnoreWorlds", list);
+            }
+        };
+        conf = new Config(new File(getDataFolder(), "Config.yml"), Config.YAML, cs);
+        ignoreWorlds = conf.getStringList("IgnoreWorlds");
     }
 }
