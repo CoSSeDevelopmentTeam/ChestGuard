@@ -53,7 +53,8 @@ public class ChestGuardAPI {
             {
                 put("owner", dataProvider.getOwnerName(getFormalizedLocationString(chest.getLocation())));
                 put("location", getFormalizedLocationString(chest.getLocation()));
-                put("type", dataProvider.getGuardType(getFormalizedLocationString(chest.getLocation())));
+                put("typeString", ProtectType.getById(dataProvider.getGuardTypeId(getFormalizedLocationString(chest.getLocation()))).toString());
+                put("typeId", dataProvider.getGuardTypeId(getFormalizedLocationString(chest.getLocation())));
                 put("data", dataProvider.getOptionData(getFormalizedLocationString(chest.getLocation())));
             }
         };
@@ -68,6 +69,6 @@ public class ChestGuardAPI {
     }
 
     private String getFormalizedLocationString(Location location) {
-        return location.getFloorX() + "::" + location.getFloorY() + "::" + location.getFloorZ() + "::" + location.getLevel().getFolderName();
+        return location.getFloorX() + "." + location.getFloorY() + "." + location.getFloorZ() + ":" + location.getLevel().getFolderName();
     }
 }

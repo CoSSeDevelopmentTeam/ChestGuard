@@ -145,23 +145,23 @@ public class SQLite3DataProvider {
         return null;
     }
 
-    public String getGuardType(String formattedLocation) {
+    public int getGuardTypeId(String formattedLocation) {
         try {
-            if (!existsChestData(formattedLocation)) return null;
+            if (!existsChestData(formattedLocation)) return ProtectType.PROTECT_TYPE_DEFAULT.getId();
 
             String sql = "SELECT type FROM chestguard WHERE location = ?";
             PreparedStatement statement = connection.prepareStatement(sql);
             statement.setQueryTimeout(30);
             statement.setString(1, formattedLocation);
 
-            String result = statement.executeQuery().getString("type");
+            int result = statement.executeQuery().getInt("type");
             statement.close();
 
             return result;
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return null;
+        return ProtectType.PROTECT_TYPE_DEFAULT.getId();
     }
 
     public String getOptionData(String formattedLocation) {
