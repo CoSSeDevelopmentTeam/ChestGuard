@@ -194,7 +194,7 @@ public class EventListener implements Listener {
                     break;
                 case "PUBLIC":
                     pluginAPI.changeChestGuardType(DataCenter.getCmdQueueRegisteredChest(event.getPlayer()), ProtectType.PROTECT_TYPE_PUBLIC, null);
-                    event.getPlayer().sendMessage(MessageType.INFO + plugin.translateString("player-set-protect-type1"));
+                    event.getPlayer().sendMessage(MessageType.INFO + plugin.translateString("player-set-protect-type1", "PUBLIC"));
                     break;
             }
         } else if (event.getFormID() == formAPI.getId("add-chest")) {
