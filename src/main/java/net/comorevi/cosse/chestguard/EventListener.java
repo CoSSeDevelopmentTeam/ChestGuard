@@ -37,6 +37,10 @@ public class EventListener implements Listener {
 
     public EventListener(Main plugin) {
         this.plugin = plugin;
+        formAPI.add("add-chest", getAddChestWindow());
+        formAPI.add("home", getHomeWindow());
+        formAPI.add("editor", getChangeGuardOptionWindow());
+        formAPI.add("pass-auth", getPasswordAuthenticationWindow());
     }
 
     @EventHandler
@@ -83,15 +87,15 @@ public class EventListener implements Listener {
             DataCenter.registerChestToCmdQueue(event.getPlayer(), (BlockChest) block);
             if (!pluginAPI.existsChestData((BlockChest) block)) {
                 if (event.getPlayer().isOp()) {
-                    formAPI.add("add-chest", getAddChestWindow());
                     event.getPlayer().showFormWindow(formAPI.get("add-chest"), formAPI.getId("add-chest"));
+                } else {
+                    event.getPlayer().sendMessage(MessageType.ERROR + plugin.translateString("error-non-permission"));
                 }
             } else {
                 if (pluginAPI.isOwner((BlockChest) block, event.getPlayer()) || event.getPlayer().isOp()) {
-                    formAPI.add("home", getHomeWindow());
                     event.getPlayer().showFormWindow(formAPI.get("home"), formAPI.getId("home"));
                 } else {
-                    formAPI.add("status", getStatusWindow((BlockChest) block));
+                    formAPI.add("status", getStatusWindow((BlockChest) block, event.getPlayer()));
                     event.getPlayer().showFormWindow(formAPI.get("status"), formAPI.getId("status"));
                 }
             }
@@ -119,7 +123,6 @@ public class EventListener implements Listener {
             case PROTECT_TYPE_PASSWORD:
                 if (pluginAPI.isOwner((BlockChest) block, event.getPlayer())) return;
                 DataCenter.addCmdQueue(event.getPlayer(), (BlockChest) block);
-                formAPI.add("pass-auth", getPasswordAuthenticationWindow());
                 event.getPlayer().showFormWindow(formAPI.get("pass-auth"), formAPI.getId("pass-auth"));
                 event.setCancelled();
                 break;
@@ -151,17 +154,15 @@ public class EventListener implements Listener {
             if (event.wasClosed()) return;
             FormResponseSimple responseSimple = (FormResponseSimple) event.getResponse();
             if (responseSimple.getClickedButton().getText().equals(plugin.translateString("button-see-information"))) {
-                formAPI.add("status", getStatusWindow(DataCenter.getCmdQueueRegisteredChest(event.getPlayer())));
+                formAPI.add("status", getStatusWindow(DataCenter.getCmdQueueRegisteredChest(event.getPlayer()), event.getPlayer()));
                 event.getPlayer().showFormWindow(formAPI.get("status"), formAPI.getId("status"));
             } else if (responseSimple.getClickedButton().getText().equals(plugin.translateString("button-open-editor"))) {
-                formAPI.add("editor", getChangeGuardOptionWindow());
                 event.getPlayer().showFormWindow(formAPI.get("editor"), formAPI.getId("editor"));
             }
         } else if (event.getFormID() == formAPI.getId("status")) {
             FormResponseModal responseModal = (FormResponseModal) event.getResponse();
             if (responseModal.getClickedButtonText().equals(plugin.translateString("button-open-editor2"))) {
                 if (pluginAPI.isOwner(DataCenter.getCmdQueueRegisteredChest(event.getPlayer()), event.getPlayer()) || event.getPlayer().isOp()) {
-                    formAPI.add("editor", getChangeGuardOptionWindow());
                     event.getPlayer().showFormWindow(formAPI.get("editor"), formAPI.getId("editor"));
                 } else {
                     event.getPlayer().sendMessage(MessageType.ALERT + plugin.translateString("error-non-permission"));
@@ -190,6 +191,7 @@ public class EventListener implements Listener {
                     }
                     pluginAPI.changeChestGuardType(DataCenter.getCmdQueueRegisteredChest(event.getPlayer()), ProtectType.PROTECT_TYPE_SHARE, responseCustom.getInputResponse(3));
                     event.getPlayer().sendMessage(MessageType.INFO + plugin.translateString("player-set-protect-type3", (String) pluginAPI.getRegisteredDataMap(DataCenter.getCmdQueueRegisteredChest(event.getPlayer())).get("data")));
+                    break;
                 case "PUBLIC":
                     pluginAPI.changeChestGuardType(DataCenter.getCmdQueueRegisteredChest(event.getPlayer()), ProtectType.PROTECT_TYPE_PUBLIC, null);
                     event.getPlayer().sendMessage(MessageType.INFO + plugin.translateString("player-set-protect-type1"));
@@ -232,9 +234,15 @@ public class EventListener implements Listener {
         buttons.add(new ElementButton(plugin.translateString("button-open-editor")));
         return new FormWindowSimple("ChestGuard", plugin.translateString("label-home"), buttons);
     }
-    private FormWindowModal getStatusWindow(BlockChest chest) {
+    private FormWindowModal getStatusWindow(BlockChest chest, Player player) {
+        String status;
+        if (pluginAPI.isOwner(chest, player) || player.isOp()) {
+            status = (String) pluginAPI.getRegisteredDataMap(chest).getOrDefault("data", "null");
+        } else {
+            status = "*****";
+        }
         return new FormWindowModal("Info - ChestGuard",
-                "owner: "+pluginAPI.getRegisteredDataMap(chest).get("owner")+"\nLocation: "+pluginAPI.getRegisteredDataMap(chest).get("location")+"\nType: "+pluginAPI.getRegisteredDataMap(chest).get("typeString")+"\nOptional data: "+pluginAPI.getRegisteredDataMap(chest).getOrDefault("data", "null"),
+                "owner: "+pluginAPI.getRegisteredDataMap(chest).get("owner")+"\nLocation: "+pluginAPI.getRegisteredDataMap(chest).get("location")+"\nType: "+pluginAPI.getRegisteredDataMap(chest).get("typeString")+"\nOptional data: "+status,
                 plugin.translateString("button-open-editor2"),
                 plugin.translateString("button-close"));
     }
