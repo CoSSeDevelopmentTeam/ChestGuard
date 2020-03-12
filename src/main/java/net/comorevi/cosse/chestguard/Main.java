@@ -23,7 +23,7 @@ public class Main extends PluginBase {
     @Override
     public void onEnable() {
         initConfig();
-        getServer().getCommandMap().register("chestgd", new ChestGuardCommand());
+        getServer().getCommandMap().register("chest", new ChestGuardCommand(this));
         getServer().getPluginManager().registerEvents(new EventListener(this), this);
     }
 

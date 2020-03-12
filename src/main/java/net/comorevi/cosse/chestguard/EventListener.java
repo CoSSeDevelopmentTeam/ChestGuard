@@ -20,6 +20,7 @@ import cn.nukkit.event.block.BlockPlaceEvent;
 import cn.nukkit.event.player.PlayerInteractEvent;
 import net.comorevi.cosse.chestguard.api.ChestGuardAPI;
 import net.comorevi.cosse.chestguard.util.DataCenter;
+import net.comorevi.cosse.chestguard.util.MessageType;
 import net.comorevi.cosse.chestguard.util.ProtectType;
 
 import java.util.Arrays;
@@ -45,7 +46,7 @@ public class EventListener implements Listener {
         if (block.getId() != CHEST) return;
 
         pluginAPI.addChestGuard((BlockChest) block, event.getPlayer());
-        event.getPlayer().sendMessage(plugin.translateString("place-chest"));
+        event.getPlayer().sendMessage(MessageType.INFO + plugin.translateString("place-chest"));
     }
 
     @EventHandler
@@ -55,19 +56,19 @@ public class EventListener implements Listener {
         if (block.getId() != CHEST) return;
         if (!pluginAPI.existsChestData((BlockChest) block) && !event.getPlayer().isOp()) {
             event.setCancelled();
-            event.getPlayer().sendMessage(plugin.translateString("error-non-registered-chest"));
+            event.getPlayer().sendMessage(MessageType.ERROR + plugin.translateString("error-non-registered-chest"));
             return;
         }
 
         if (pluginAPI.isOwner((BlockChest) block, event.getPlayer())) {
             pluginAPI.removeChestGuard((BlockChest) block);
-            event.getPlayer().sendMessage(plugin.translateString("break-chest"));
+            event.getPlayer().sendMessage(MessageType.INFO + plugin.translateString("break-chest"));
         } else if (event.getPlayer().isOp()) {
             pluginAPI.removeChestGuard((BlockChest) block);
-            event.getPlayer().sendMessage(plugin.translateString("player-chest-break-byOp"));
+            event.getPlayer().sendMessage(MessageType.ALERT + plugin.translateString("player-chest-break-byOp"));
         } else {
             event.setCancelled();
-            event.getPlayer().sendMessage(plugin.translateString("error-not-own-chest"));
+            event.getPlayer().sendMessage(MessageType.ALERT + plugin.translateString("error-not-own-chest"));
         }
     }
 
@@ -99,12 +100,12 @@ public class EventListener implements Listener {
 
         if (!pluginAPI.existsChestData((BlockChest) block)) {
             event.setCancelled();
-            event.getPlayer().sendMessage(plugin.translateString("error-non-registered-chest"));
+            event.getPlayer().sendMessage(MessageType.ERROR + plugin.translateString("error-non-registered-chest"));
             return;
         }
 
         if (!pluginAPI.isOwner((BlockChest) block, event.getPlayer()) && event.getPlayer().isOp()) {
-            event.getPlayer().sendMessage(plugin.translateString("player-chest-interact-byOp"));
+            event.getPlayer().sendMessage(MessageType.ALERT + plugin.translateString("player-chest-interact-byOp"));
             return;
         }
 
@@ -112,7 +113,7 @@ public class EventListener implements Listener {
             case PROTECT_TYPE_DEFAULT:
                 if (!pluginAPI.isOwner((BlockChest) block, event.getPlayer())) {
                     event.setCancelled();
-                    event.getPlayer().sendMessage(plugin.translateString("error-not-own-chest"));
+                    event.getPlayer().sendMessage(MessageType.ALERT + plugin.translateString("error-not-own-chest"));
                 }
                 break;
             case PROTECT_TYPE_PASSWORD:
@@ -128,17 +129,17 @@ public class EventListener implements Listener {
                     String[] shared = data.split(",");
                     if (!Arrays.asList(shared).contains(event.getPlayer().getName())) {
                         event.setCancelled();
-                        event.getPlayer().sendMessage(plugin.translateString("error-not-shared"));
+                        event.getPlayer().sendMessage(MessageType.ALERT + plugin.translateString("error-not-shared"));
                     } else {
                         event.getPlayer().addWindow(((BlockEntityChest) block.getLevel().getBlockEntity(block.getLocation())).getInventory());
-                        event.getPlayer().sendMessage(plugin.translateString("player-certified"));
+                        event.getPlayer().sendMessage(MessageType.INFO + plugin.translateString("player-certified"));
                     }
                 }
                 break;
             case PROTECT_TYPE_PUBLIC:
                 if (!pluginAPI.isOwner((BlockChest) block, event.getPlayer())) {
                     event.getPlayer().addWindow(((BlockEntityChest) block.getLevel().getBlockEntity(block.getLocation())).getInventory());
-                    event.getPlayer().sendMessage(plugin.translateString("player-open-public-chest", (String) pluginAPI.getRegisteredDataMap((BlockChest) block).get("owner")));
+                    event.getPlayer().sendMessage(MessageType.INFO + plugin.translateString("player-open-public-chest", (String) pluginAPI.getRegisteredDataMap((BlockChest) block).get("owner")));
                 }
                 break;
         }
@@ -157,7 +158,7 @@ public class EventListener implements Listener {
                 event.getPlayer().showFormWindow(formAPI.get("editor"), formAPI.getId("editor"));
             } else if (responseSimple.getClickedButton().getText().equals(plugin.translateString("button-add-new-chest"))) {
                 if (pluginAPI.existsChestData(DataCenter.getCmdQueueRegisteredChest(event.getPlayer()))) {
-                    event.getPlayer().sendMessage(plugin.translateString("player-chest-added"));
+                    event.getPlayer().sendMessage(MessageType.INFO + plugin.translateString("player-chest-added"));
                 } else {
                     formAPI.add("add-chest", getAddChestWindow());
                     event.getPlayer().showFormWindow(formAPI.get("add-chest"), formAPI.getId("add-chest"));
@@ -170,7 +171,7 @@ public class EventListener implements Listener {
                     formAPI.add("editor", getChangeGuardOptionWindow());
                     event.getPlayer().showFormWindow(formAPI.get("editor"), formAPI.getId("editor"));
                 } else {
-                    event.getPlayer().sendMessage(plugin.translateString("error-non-permission"));
+                    event.getPlayer().sendMessage(MessageType.ALERT + plugin.translateString("error-non-permission"));
                 }
             }
         } else if (event.getFormID() == formAPI.getId("editor")) {
@@ -179,36 +180,36 @@ public class EventListener implements Listener {
             switch (responseCustom.getDropdownResponse(1).getElementContent()) {
                 case "DEFAULT":
                     pluginAPI.changeChestGuardType(DataCenter.getCmdQueueRegisteredChest(event.getPlayer()), ProtectType.PROTECT_TYPE_DEFAULT, null);
-                    event.getPlayer().sendMessage(plugin.translateString("player-set-protect-type1", "DEFAULT"));
+                    event.getPlayer().sendMessage(MessageType.INFO + plugin.translateString("player-set-protect-type1", "DEFAULT"));
                     break;
                 case "PASSWORD":
                     if (responseCustom.getInputResponse(3).equals("")) {
-                        event.getPlayer().sendMessage(plugin.translateString("error-lack-of-data"));
+                        event.getPlayer().sendMessage(MessageType.ERROR + plugin.translateString("error-lack-of-data"));
                         break;
                     }
                     pluginAPI.changeChestGuardType(DataCenter.getCmdQueueRegisteredChest(event.getPlayer()), ProtectType.PROTECT_TYPE_PASSWORD, responseCustom.getInputResponse(3));
-                    event.getPlayer().sendMessage(plugin.translateString("player-set-protect-type2", (String) pluginAPI.getRegisteredDataMap(DataCenter.getCmdQueueRegisteredChest(event.getPlayer())).get("data")));
+                    event.getPlayer().sendMessage(MessageType.INFO + plugin.translateString("player-set-protect-type2", (String) pluginAPI.getRegisteredDataMap(DataCenter.getCmdQueueRegisteredChest(event.getPlayer())).get("data")));
                     break;
                 case "SHARE":
                     if (responseCustom.getInputResponse(3).equals("")) {
-                        event.getPlayer().sendMessage(plugin.translateString("error-lack-of-data"));
+                        event.getPlayer().sendMessage(MessageType.ERROR + plugin.translateString("error-lack-of-data"));
                         break;
                     }
                     pluginAPI.changeChestGuardType(DataCenter.getCmdQueueRegisteredChest(event.getPlayer()), ProtectType.PROTECT_TYPE_SHARE, responseCustom.getInputResponse(3));
-                    event.getPlayer().sendMessage(plugin.translateString("player-set-protect-type3", (String) pluginAPI.getRegisteredDataMap(DataCenter.getCmdQueueRegisteredChest(event.getPlayer())).get("data")));
+                    event.getPlayer().sendMessage(MessageType.INFO + plugin.translateString("player-set-protect-type3", (String) pluginAPI.getRegisteredDataMap(DataCenter.getCmdQueueRegisteredChest(event.getPlayer())).get("data")));
                 case "PUBLIC":
                     pluginAPI.changeChestGuardType(DataCenter.getCmdQueueRegisteredChest(event.getPlayer()), ProtectType.PROTECT_TYPE_PUBLIC, null);
-                    event.getPlayer().sendMessage(plugin.translateString("player-set-protect-type1"));
+                    event.getPlayer().sendMessage(MessageType.INFO + plugin.translateString("player-set-protect-type1"));
                     break;
             }
         } else if (event.getFormID() == formAPI.getId("add-chest")) {
             if (event.wasClosed()) return;
             FormResponseCustom responseCustom = (FormResponseCustom) event.getResponse();
             if (responseCustom.getInputResponse(1).equals("")) {
-                event.getPlayer().sendMessage(plugin.translateString("error-lack-of-data"));
+                event.getPlayer().sendMessage(MessageType.ERROR + plugin.translateString("error-lack-of-data"));
             } else {
                 pluginAPI.addChestGuard(DataCenter.getCmdQueueRegisteredChest(event.getPlayer()), responseCustom.getInputResponse(1));
-                event.getPlayer().sendMessage(plugin.translateString("player-chest-added"));
+                event.getPlayer().sendMessage(MessageType.INFO + plugin.translateString("player-chest-added"));
             }
         } else if (event.getFormID() == formAPI.getId("pass-auth")) {
             if (event.wasClosed()) {
@@ -218,15 +219,15 @@ public class EventListener implements Listener {
             FormResponseCustom responseCustom = (FormResponseCustom) event.getResponse();
             if (responseCustom.getInputResponse(1).equals("")) {
                 DataCenter.removeCmdQueue(event.getPlayer());
-                event.getPlayer().sendMessage(plugin.translateString("error-password-not-entered"));
+                event.getPlayer().sendMessage(MessageType.ERROR + plugin.translateString("error-password-not-entered"));
             } else {
                 if (pluginAPI.getRegisteredDataMap(DataCenter.getCmdQueueRegisteredChest(event.getPlayer())).get("data").equals(responseCustom.getInputResponse(1))) {
                     event.getPlayer().addWindow(((BlockEntityChest) event.getPlayer().getLevel().getBlockEntity(DataCenter.getCmdQueueRegisteredChest(event.getPlayer()).getLocation())).getInventory());
                     DataCenter.removeCmdQueue(event.getPlayer());
-                    event.getPlayer().sendMessage(plugin.translateString("player-certified"));
+                    event.getPlayer().sendMessage(MessageType.INFO + plugin.translateString("player-certified"));
                 } else {
                     DataCenter.removeCmdQueue(event.getPlayer());
-                    event.getPlayer().sendMessage(plugin.translateString("error-missed-password"));
+                    event.getPlayer().sendMessage(MessageType.ERROR + plugin.translateString("error-missed-password"));
                 }
             }
         }
