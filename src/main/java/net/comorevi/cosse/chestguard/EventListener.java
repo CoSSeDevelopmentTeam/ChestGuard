@@ -88,7 +88,7 @@ public class EventListener implements Listener {
                 }
             } else {
                 if (pluginAPI.isOwner((BlockChest) block, event.getPlayer()) || event.getPlayer().isOp()) {
-                    formAPI.add("home", getHomeWindow(event.getPlayer()));
+                    formAPI.add("home", getHomeWindow());
                     event.getPlayer().showFormWindow(formAPI.get("home"), formAPI.getId("home"));
                 } else {
                     formAPI.add("status", getStatusWindow((BlockChest) block));
@@ -156,13 +156,6 @@ public class EventListener implements Listener {
             } else if (responseSimple.getClickedButton().getText().equals(plugin.translateString("button-open-editor"))) {
                 formAPI.add("editor", getChangeGuardOptionWindow());
                 event.getPlayer().showFormWindow(formAPI.get("editor"), formAPI.getId("editor"));
-            } else if (responseSimple.getClickedButton().getText().equals(plugin.translateString("button-add-new-chest"))) {
-                if (pluginAPI.existsChestData(DataCenter.getCmdQueueRegisteredChest(event.getPlayer()))) {
-                    event.getPlayer().sendMessage(MessageType.INFO + plugin.translateString("player-chest-added"));
-                } else {
-                    formAPI.add("add-chest", getAddChestWindow());
-                    event.getPlayer().showFormWindow(formAPI.get("add-chest"), formAPI.getId("add-chest"));
-                }
             }
         } else if (event.getFormID() == formAPI.getId("status")) {
             FormResponseModal responseModal = (FormResponseModal) event.getResponse();
@@ -233,11 +226,10 @@ public class EventListener implements Listener {
         }
     }
 
-    private FormWindowSimple getHomeWindow(Player player) {
+    private FormWindowSimple getHomeWindow() {
         List<ElementButton> buttons = new LinkedList<>();
         buttons.add(new ElementButton(plugin.translateString("button-see-information")));
         buttons.add(new ElementButton(plugin.translateString("button-open-editor")));
-        if (player.isOp()) buttons.add(new ElementButton(plugin.translateString("button-add-new-chest")));
         return new FormWindowSimple("ChestGuard", plugin.translateString("label-home"), buttons);
     }
     private FormWindowModal getStatusWindow(BlockChest chest) {
