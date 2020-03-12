@@ -31,7 +31,6 @@ import static cn.nukkit.block.BlockID.CHEST;
 public class EventListener implements Listener {
 
     private Main plugin;
-    private String br = System.getProperty("line.separator");
     private ChestGuardAPI pluginAPI = ChestGuardAPI.getSingletonInstance();
     private FormAPI formAPI = new FormAPI();
 
@@ -129,17 +128,17 @@ public class EventListener implements Listener {
                     String[] shared = data.split(",");
                     if (!Arrays.asList(shared).contains(event.getPlayer().getName())) {
                         event.setCancelled();
-                        event.getPlayer().sendMessage("[ChestGuard] This chest is not shared with you.");
+                        event.getPlayer().sendMessage(plugin.translateString("error-not-shared"));
                     } else {
                         event.getPlayer().addWindow(((BlockEntityChest) block.getLevel().getBlockEntity(block.getLocation())).getInventory());
-                        event.getPlayer().sendMessage("[ChestGuard] Certified.");
+                        event.getPlayer().sendMessage(plugin.translateString("player-certified"));
                     }
                 }
                 break;
             case PROTECT_TYPE_PUBLIC:
                 if (!pluginAPI.isOwner((BlockChest) block, event.getPlayer())) {
                     event.getPlayer().addWindow(((BlockEntityChest) block.getLevel().getBlockEntity(block.getLocation())).getInventory());
-                    event.getPlayer().sendMessage("[ChestGuard] You opened PUBLIC chest. Provided by "+pluginAPI.getRegisteredDataMap((BlockChest) block).get("owner")+".");
+                    event.getPlayer().sendMessage(plugin.translateString("player-open-public-chest", (String) pluginAPI.getRegisteredDataMap((BlockChest) block).get("owner")));
                 }
                 break;
         }
@@ -150,15 +149,15 @@ public class EventListener implements Listener {
         if (event.getFormID() == formAPI.getId("home")) {
             if (event.wasClosed()) return;
             FormResponseSimple responseSimple = (FormResponseSimple) event.getResponse();
-            if (responseSimple.getClickedButton().getText().equals("See information")) {
+            if (responseSimple.getClickedButton().getText().equals(plugin.translateString("button-see-information"))) {
                 formAPI.add("status", getStatusWindow(DataCenter.getCmdQueueRegisteredChest(event.getPlayer())));
                 event.getPlayer().showFormWindow(formAPI.get("status"), formAPI.getId("status"));
-            } else if (responseSimple.getClickedButton().getText().equals("Open setting editor")) {
+            } else if (responseSimple.getClickedButton().getText().equals(plugin.translateString("button-open-editor"))) {
                 formAPI.add("editor", getChangeGuardOptionWindow());
                 event.getPlayer().showFormWindow(formAPI.get("editor"), formAPI.getId("editor"));
-            } else if (responseSimple.getClickedButton().getText().equals("Add new chest")) {
+            } else if (responseSimple.getClickedButton().getText().equals(plugin.translateString("button-add-new-chest"))) {
                 if (pluginAPI.existsChestData(DataCenter.getCmdQueueRegisteredChest(event.getPlayer()))) {
-                    event.getPlayer().sendMessage("[ChestGuard] This chest had been registered.");
+                    event.getPlayer().sendMessage(plugin.translateString("player-chest-added"));
                 } else {
                     formAPI.add("add-chest", getAddChestWindow());
                     event.getPlayer().showFormWindow(formAPI.get("add-chest"), formAPI.getId("add-chest"));
@@ -166,12 +165,12 @@ public class EventListener implements Listener {
             }
         } else if (event.getFormID() == formAPI.getId("status")) {
             FormResponseModal responseModal = (FormResponseModal) event.getResponse();
-            if (responseModal.getClickedButtonText().equals("Edit option")) {
+            if (responseModal.getClickedButtonText().equals(plugin.translateString("button-open-editor2"))) {
                 if (pluginAPI.isOwner(DataCenter.getCmdQueueRegisteredChest(event.getPlayer()), event.getPlayer()) || event.getPlayer().isOp()) {
                     formAPI.add("editor", getChangeGuardOptionWindow());
                     event.getPlayer().showFormWindow(formAPI.get("editor"), formAPI.getId("editor"));
                 } else {
-                    event.getPlayer().sendMessage("[ChestGuard] You have not enough permission.");
+                    event.getPlayer().sendMessage(plugin.translateString("error-non-permission"));
                 }
             }
         } else if (event.getFormID() == formAPI.getId("editor")) {
@@ -180,37 +179,36 @@ public class EventListener implements Listener {
             switch (responseCustom.getDropdownResponse(1).getElementContent()) {
                 case "DEFAULT":
                     pluginAPI.changeChestGuardType(DataCenter.getCmdQueueRegisteredChest(event.getPlayer()), ProtectType.PROTECT_TYPE_DEFAULT, null);
-                    event.getPlayer().sendMessage("[ChestGuard] Set guard type to DEFAULT.");
+                    event.getPlayer().sendMessage(plugin.translateString("player-set-protect-type1", "DEFAULT"));
                     break;
                 case "PASSWORD":
                     if (responseCustom.getInputResponse(3).equals("")) {
-                        event.getPlayer().sendMessage("[ChestGuard] Enter additional data(password)");
+                        event.getPlayer().sendMessage(plugin.translateString("error-lack-of-data"));
                         break;
                     }
                     pluginAPI.changeChestGuardType(DataCenter.getCmdQueueRegisteredChest(event.getPlayer()), ProtectType.PROTECT_TYPE_PASSWORD, responseCustom.getInputResponse(3));
-                    event.getPlayer().sendMessage("[ChestGuard] Set guard type to PASSWORD."+br+"Your password is: "+pluginAPI.getRegisteredDataMap(DataCenter.getCmdQueueRegisteredChest(event.getPlayer())).get("data"));
+                    event.getPlayer().sendMessage(plugin.translateString("player-set-protect-type2", (String) pluginAPI.getRegisteredDataMap(DataCenter.getCmdQueueRegisteredChest(event.getPlayer())).get("data")));
                     break;
                 case "SHARE":
                     if (responseCustom.getInputResponse(3).equals("")) {
-                        event.getPlayer().sendMessage("[ChestGuard] Enter additional data(friends' name)");
+                        event.getPlayer().sendMessage(plugin.translateString("error-lack-of-data"));
                         break;
                     }
                     pluginAPI.changeChestGuardType(DataCenter.getCmdQueueRegisteredChest(event.getPlayer()), ProtectType.PROTECT_TYPE_SHARE, responseCustom.getInputResponse(3));
-                    event.getPlayer().sendMessage("[ChestGuard] Set guard type to SHARE."+br+"Your chest is shared with: "+pluginAPI.getRegisteredDataMap(DataCenter.getCmdQueueRegisteredChest(event.getPlayer())).get("data"));
-                    break;
+                    event.getPlayer().sendMessage(plugin.translateString("player-set-protect-type3", (String) pluginAPI.getRegisteredDataMap(DataCenter.getCmdQueueRegisteredChest(event.getPlayer())).get("data")));
                 case "PUBLIC":
                     pluginAPI.changeChestGuardType(DataCenter.getCmdQueueRegisteredChest(event.getPlayer()), ProtectType.PROTECT_TYPE_PUBLIC, null);
-                    event.getPlayer().sendMessage("[ChestGuard] Set guard type to PUBLIC.");
+                    event.getPlayer().sendMessage(plugin.translateString("player-set-protect-type1"));
                     break;
             }
         } else if (event.getFormID() == formAPI.getId("add-chest")) {
             if (event.wasClosed()) return;
             FormResponseCustom responseCustom = (FormResponseCustom) event.getResponse();
             if (responseCustom.getInputResponse(1).equals("")) {
-                event.getPlayer().sendMessage("[ChestGuard] Enter owner's name.");
+                event.getPlayer().sendMessage(plugin.translateString("error-lack-of-data"));
             } else {
                 pluginAPI.addChestGuard(DataCenter.getCmdQueueRegisteredChest(event.getPlayer()), responseCustom.getInputResponse(1));
-                event.getPlayer().sendMessage("[ChestGuard] Added new chest.");
+                event.getPlayer().sendMessage(plugin.translateString("player-chest-added"));
             }
         } else if (event.getFormID() == formAPI.getId("pass-auth")) {
             if (event.wasClosed()) {
@@ -220,15 +218,15 @@ public class EventListener implements Listener {
             FormResponseCustom responseCustom = (FormResponseCustom) event.getResponse();
             if (responseCustom.getInputResponse(1).equals("")) {
                 DataCenter.removeCmdQueue(event.getPlayer());
-                event.getPlayer().sendMessage("[ChestGuard] You have to enter password to open the chest.");
+                event.getPlayer().sendMessage(plugin.translateString("error-password-not-entered"));
             } else {
                 if (pluginAPI.getRegisteredDataMap(DataCenter.getCmdQueueRegisteredChest(event.getPlayer())).get("data").equals(responseCustom.getInputResponse(1))) {
                     event.getPlayer().addWindow(((BlockEntityChest) event.getPlayer().getLevel().getBlockEntity(DataCenter.getCmdQueueRegisteredChest(event.getPlayer()).getLocation())).getInventory());
                     DataCenter.removeCmdQueue(event.getPlayer());
-                    event.getPlayer().sendMessage("[ChestGuard] Certified.");
+                    event.getPlayer().sendMessage(plugin.translateString("player-certified"));
                 } else {
                     DataCenter.removeCmdQueue(event.getPlayer());
-                    event.getPlayer().sendMessage("[ChestGuard] Password is not correct.");
+                    event.getPlayer().sendMessage(plugin.translateString("error-missed-password"));
                 }
             }
         }
@@ -236,22 +234,22 @@ public class EventListener implements Listener {
 
     private FormWindowSimple getHomeWindow(Player player) {
         List<ElementButton> buttons = new LinkedList<>();
-        buttons.add(new ElementButton("See information"));
-        buttons.add(new ElementButton("Open setting editor"));
-        if (player.isOp()) buttons.add(new ElementButton("Add new chest"));
-        return new FormWindowSimple("ChestGuard", "What are you want to do?", buttons);
+        buttons.add(new ElementButton(plugin.translateString("button-see-information")));
+        buttons.add(new ElementButton(plugin.translateString("button-open-editor")));
+        if (player.isOp()) buttons.add(new ElementButton(plugin.translateString("button-add-new-chest")));
+        return new FormWindowSimple("ChestGuard", plugin.translateString("label-home"), buttons);
     }
     private FormWindowModal getStatusWindow(BlockChest chest) {
         return new FormWindowModal("Info - ChestGuard",
-                "owner: "+pluginAPI.getRegisteredDataMap(chest).get("owner")+br+"Location: "+pluginAPI.getRegisteredDataMap(chest).get("location")+br+"Type: "+pluginAPI.getRegisteredDataMap(chest).get("typeString")+br+"Optional data: "+pluginAPI.getRegisteredDataMap(chest).getOrDefault("data", "null"),
-                "Edit option",
-                "close");
+                "owner: "+pluginAPI.getRegisteredDataMap(chest).get("owner")+"\nLocation: "+pluginAPI.getRegisteredDataMap(chest).get("location")+"\nType: "+pluginAPI.getRegisteredDataMap(chest).get("typeString")+"\nOptional data: "+pluginAPI.getRegisteredDataMap(chest).getOrDefault("data", "null"),
+                plugin.translateString("button-open-editor2"),
+                plugin.translateString("button-close"));
     }
     private FormWindowCustom getChangeGuardOptionWindow() {
         List<Element> elements = new LinkedList<Element>() {
             {
-                add(new ElementLabel("Select guard option to change. If you selected PASSWORD or SHARE, you have to enter additional data below drop-down."));
-                add(new ElementDropdown("type", new LinkedList<String>() {
+                add(new ElementLabel(plugin.translateString("label-editor1")));
+                add(new ElementDropdown("Type", new LinkedList<String>() {
                     {
                         add("DEFAULT");
                         add("PASSWORD");
@@ -259,8 +257,8 @@ public class EventListener implements Listener {
                         add("PUBLIC");
                     }
                 }));
-                add(new ElementLabel("If you selected PASSWORD or SHARE, please enter password or friends' name.(ex. Steve,Alex)"));
-                add(new ElementInput("optional data", "enter data..."));
+                add(new ElementLabel(plugin.translateString("label-editor2")));
+                add(new ElementInput("Additional data", "enter data..."));
             }
         };
         return new FormWindowCustom("Editor - ChestGuard", elements);
@@ -268,7 +266,7 @@ public class EventListener implements Listener {
     private FormWindowCustom getAddChestWindow() {
         List<Element> elements = new LinkedList<Element>() {
             {
-                add(new ElementLabel("Enter owner's name and push submit."));
+                add(new ElementLabel(plugin.translateString("label-add")));
                 add(new ElementInput("Owner", "enter name..."));
             }
         };
@@ -277,7 +275,7 @@ public class EventListener implements Listener {
     private FormWindowCustom getPasswordAuthenticationWindow() {
         List<Element> elements = new LinkedList<Element>() {
             {
-                add(new ElementLabel("Enter password and push submit."));
+                add(new ElementLabel(plugin.translateString("label-pass")));
                 add(new ElementInput("Password", "enter password..."));
             }
         };

@@ -22,9 +22,7 @@ public class Main extends PluginBase {
 
     @Override
     public void onEnable() {
-        getDataFolder().mkdirs();
-        initMessageConfig();
-        initChestProtectConfig();
+        initConfig();
         getServer().getCommandMap().register("chestgd", new ChestGuardCommand());
         getServer().getPluginManager().registerEvents(new EventListener(this), this);
     }
@@ -50,7 +48,8 @@ public class Main extends PluginBase {
         return "";
     }
 
-    private void initMessageConfig() {
+    private void initConfig() {
+        if (!getDataFolder().exists()) getDataFolder().mkdir();
         if(!new File(getDataFolder().toString() + "/Message.yml").exists()){
             try {
                 FileWriter fw = new FileWriter(new File(getDataFolder().toString() + "/Message.yml"), true);//trueで追加書き込み,falseで上書き
@@ -66,9 +65,7 @@ public class Main extends PluginBase {
         this.translateFile = new Config(new File(getDataFolder().toString() + "/Message.yml"), Config.YAML);
         this.translateFile.load(getDataFolder().toString() + "/Message.yml");
         this.configData = this.translateFile.getAll();
-    }
 
-    private void initChestProtectConfig(){
         List<String> list = new LinkedList<String>(){
             {
                 add("enter_ignore_level_name_NOT_folder_name");
