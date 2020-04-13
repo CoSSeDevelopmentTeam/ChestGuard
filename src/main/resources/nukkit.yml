@@ -1,6 +1,6 @@
 name: ChestGuard
 main: net.comorevi.cosse.chestguard.Main
-version: 1.0.0
+version: 1.0.1
 author: popkechupki
 authors: ["itsu"]
 load: POSTWORLD

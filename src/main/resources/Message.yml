@@ -19,6 +19,7 @@ error-not-own-chest: "自分のチェストではないため編集できませ�
 error-not-shared: "このチェストはあなたに共有されていません。"
 error-password-not-entered: "このチェストを開くにはパスワードを入力する必要があります。"
 error-missed-password: "入力されたパスワードは正しくありません。"
+error-place-chest: "他ユーザーの設置したチェストとリンクされるためここには設置できません。"
 error-execute-command-console: "コマンドはゲーム内から実行してください。"
 error-notFoundKey: "指定されたキーは見つかりませんでした。"
 # MainWindow
