@@ -3,7 +3,6 @@ package net.comorevi.cosse.chestguard;
 import FormAPI.api.FormAPI;
 import cn.nukkit.Player;
 import cn.nukkit.block.BlockChest;
-import cn.nukkit.block.BlockID;
 import cn.nukkit.blockentity.BlockEntityChest;
 import cn.nukkit.event.player.PlayerFormRespondedEvent;
 import cn.nukkit.form.element.*;
@@ -222,10 +221,7 @@ public class EventListener implements Listener {
                     event.getPlayer().sendMessage(MessageType.INFO + plugin.translateString("player-chest-added"));
                 }
             } else if (event.getFormID() == formAPI.getId("pass-auth")) {
-                if (event.wasClosed()) {
-                    DataCenter.removeCmdQueue(event.getPlayer());
-                    return;
-                }
+                if (event.wasClosed()) return;
                 if (response.getInputResponse(1).equals("")) {
                     DataCenter.removeCmdQueue(event.getPlayer());
                     event.getPlayer().sendMessage(MessageType.ERROR + plugin.translateString("error-password-not-entered"));
