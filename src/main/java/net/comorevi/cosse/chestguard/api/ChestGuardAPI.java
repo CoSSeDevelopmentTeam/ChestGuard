@@ -20,7 +20,7 @@ public class ChestGuardAPI {
     /*
      * Get API instance.
      */
-    public static ChestGuardAPI getSingletonInstance() {
+    public static ChestGuardAPI getInstance() {
         return instance;
     }
 
