@@ -23,17 +23,22 @@ error-place-chest: "他ユーザーの設置したチェストとリンクされ
 error-execute-command-console: "コマンドはゲーム内から実行してください。"
 error-notFoundKey: "指定されたキーは見つかりませんでした。"
 # MainWindow
+main-window-title: "ChestGuard"
 label-home: "希望する操作を選んでください。"
 button-see-information: "情報を見る"
 button-open-editor: "登録内容を編集する"
 button-add-new-chest: "チェストを追加する"
 # StatusWindow
+status-window-title: "情報 - ChestGuard"
 button-open-editor2: "登録内容を編集する"
 button-close: "閉じる"
 # EditGuardTypeWindow
+edit-guard-type-window-title: "変更 - ChestGuard"
 label-editor1: "変更する保護モードを選択してください。PASSWORDまたはSHAREを選んだ場合は下の入力欄に追加のデータを入力してください。"
 label-editor2: "PASSWORDまたはSHAREを選んだ場合、下の入力欄にデータを入力してください。（SHAREの入力例：Steve,Alex）"
 # AddChestWindow
+add-chest-window-title: "追加 - ChestGuard"
 label-add: "チェストの持ち主の名前を入力して送信ボタンを押してください。"
 # PasswordAuthenticationWindow
+pass-auth-window-title: "認証 - ChestGuard"
 label-pass: "パスワードを入力して送信ボタンを押してください。"

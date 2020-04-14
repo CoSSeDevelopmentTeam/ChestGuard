@@ -29,7 +29,7 @@ public class Main extends PluginBase {
 
     @Override
     public void onDisable() {
-        ChestGuardAPI.getSingletonInstance().disconnect();
+        ChestGuardAPI.getInstance().disconnect();
     }
 
     public String translateString(String key, String... args){
